@@ -9,19 +9,22 @@ Author URI: https://imtiazrayhan.com/
 License: GPL2
 */
 
-// Add the dashboard widget
+// Add the dashboard widget with high priority
 function author_stats_widget() {
 	wp_add_dashboard_widget(
 		"author_stats_widget", 
 		"Authors Publishing Stats", 
-		"display_author_stats_widget"
+		"display_author_stats_widget",
+		"normal",
+		"high" // set priority to high
 	);
 }
 add_action("wp_dashboard_setup", "author_stats_widget");
 
+
 // Display the widget content
 function display_author_stats_widget() {
-	$users = get_users( array( 'role__in' => array( 'author',  ) ) );
+	$users = get_users( array( 'role__in' => array( 'author', 'editor' ) ) );
 	$post_counts = [];
 	$current_month = date("n");
 	$current_year = date("Y");
@@ -51,9 +54,18 @@ function display_author_stats_widget() {
 	echo "table.asw-table th {background-color: #f2f2f2;}";
 	echo "</style>";
 	echo '<table class="asw-table">';
-	echo "<tr><th>Author</th><th>" . date("F", mktime(0, 0, 0, $current_month - 2, 1, $current_year)) . "</th><th>" . date("F", mktime(0, 0, 0, $current_month - 1, 1, $current_year)) . "</th><th>" . date("F", mktime(0, 0, 0, $current_month, 1, $current_year)) . "</th></tr>";
+	echo "<tr><th>Author</th><th>All Time</th><th>" . date("M", mktime(0, 0, 0, $current_month - 2, 1, $current_year)) . "</th><th>" . date("M", mktime(0, 0, 0, $current_month - 1, 1, $current_year)) . "</th><th>" . date("M", mktime(0, 0, 0, $current_month, 1, $current_year)) . "</th></tr>";
 	foreach ($post_counts as $name => $counts) {
 		echo "<tr><td>" . $name . "</td><td>";
+		$args = ["author" => $users[array_search($name, array_column($users, 'display_name'))]->ID, "post_type" => "post", "post_status" => "publish", "posts_per_page" => -1];
+		$query = new WP_Query($args);
+		$count = $query->found_posts;
+		if ($count > 0) {
+			echo "<a href='" . admin_url("edit.php?author=" . $users[array_search($name, array_column($users, 'display_name'))]->ID) . "'>" . $count . "</a>";
+		} else {
+			echo "0";
+		}
+		echo "</td><td>";
 		if (isset($counts[date("F", mktime(0, 0, 0, $current_month - 2, 1, $current_year))])) {
 			$month_count = $counts[date("F", mktime(0, 0, 0, $current_month - 2, 1, $current_year))];
 			if ($month_count > 0) {
