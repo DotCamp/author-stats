@@ -21,7 +21,7 @@ add_action("wp_dashboard_setup", "author_stats_widget");
 
 // Display the widget content
 function display_author_stats_widget() {
-	$users = get_users();
+	$users = get_users( array( 'role__in' => array( 'author',  ) ) );
 	$post_counts = [];
 	$current_month = date("n");
 	$current_year = date("Y");
