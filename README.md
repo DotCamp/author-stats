@@ -1,3 +1,3 @@
 # Author Stats Plugin 
 
-Shows author stats in WordPress dashboard.
+Shows author stats widget in WordPress dashboard.
